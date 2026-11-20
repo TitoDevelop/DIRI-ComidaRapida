@@ -1,21 +1,17 @@
 import { useState } from 'react';
-import type { MenuItem } from '../entities/entities';
+import { useFood } from '../context/FoodContext';
 
-interface FoodOrderProps {
-  food: MenuItem;
-  onQuantityUpdated: (id: number, quantity: number) => void;
-  onReturnToMenu: () => void;
-}
-
-export default function FoodOrder({ food, onQuantityUpdated, onReturnToMenu }: FoodOrderProps) {
+export default function FoodOrder() {
+  // El producto, el envío del pedido y la navegación se obtienen de Context.
+  const { selectedFood: food, sendOrder, showMenu } = useFood();
   const [quantity, setQuantity] = useState(1);
   const [ordered, setOrdered] = useState(false);
+  if (!food) return null;
   const totalAmount = food.price * quantity;
 
-  const sendOrder = () => {
+  const handleOrderClick = () => {
     if (quantity < 1 || quantity > food.quantity || ordered) return;
-    onQuantityUpdated(food.id, quantity);
-    setOrdered(true);
+    if (sendOrder(food.id, quantity)) setOrdered(true);
   };
 
   return (
@@ -30,9 +26,9 @@ export default function FoodOrder({ food, onQuantityUpdated, onReturnToMenu }: F
           <input id="quantity" type="number" min="1" max={food.quantity} value={quantity}
             onChange={e => setQuantity(Math.min(food.quantity, Math.max(1, Number(e.target.value) || 1)))} />
           <div className="total"><span>Total a pagar en la recogida</span><strong>{totalAmount.toFixed(2)} €</strong></div>
-          <button className="primary" onClick={sendOrder}>Enviar pedido</button></>
+          <button className="primary" onClick={handleOrderClick}>Enviar pedido</button></>
         )}
-        <button className="back" onClick={onReturnToMenu}>← Volver al menú</button>
+        <button className="back" onClick={showMenu}>← Volver al menú</button>
       </div>
     </section>
   );

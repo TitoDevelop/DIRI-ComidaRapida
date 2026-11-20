@@ -1,39 +1,29 @@
-# AC 5.1 — Comida rápida online
+# AC 5.2 — Contexto de React
 
-**Alumno:** José Luis Mas García  
-**Asignatura:** Desarrollo de Interfaces Ricos para Internet (DIRI)
+**Alumno:** José Luis Mas García
 
-Aplicación de recogida de comida hecha con React y TypeScript. Los productos se pueden consultar en la vista de disponibilidad y pedir en la carta. Se paga en efectivo al recoger el pedido.
+Esta es la continuación de **AC 5.1**. El diseño y el proceso de compra siguen siendo los mismos, pero se sustituye el paso de información entre componentes por React Context, como pide el profesor en la diapositiva 275.
 
 ## Ejecutar
 
 ```bash
 npm install
 npm run dev
-```
-
-Para comprobar la compilación:
-
-```bash
 npm run build
 ```
 
-## Qué se ha realizado
+## Qué he cambiado
 
-- Entidad `MenuItem` en `src/entities/entities.ts`.
-- Vista de disponibilidad con nombre y stock.
-- Vista de carta con cuatro productos e imágenes propias.
-- `Foods` cargado con `React.lazy` y `Suspense`.
-- `FoodOrder` permite cambiar cantidad y ver cómo cambia el precio.
-- Al confirmar, `FoodOrder` avisa a `App` mediante `onQuantityUpdated`; `App` descuenta el stock.
-- Confirmación del pedido y vuelta a la carta. Pago solamente en efectivo durante la recogida.
+- `src/context/FoodContext.tsx`: almacena el menú, el stock, el producto seleccionado y las acciones de compra.
+- `App.tsx` contiene el `FoodProvider` y utiliza `useFood()`.
+- `Foods.tsx` obtiene los productos y la función de selección del contexto, sin props.
+- `FoodOrder.tsx` obtiene el producto y actualiza el stock usando el contexto, sin props.
+- Se mantiene la carga diferida de `Foods` de la actividad 5.1.
 
-La gestión del carrito no se incluye porque es opcional. El contexto de React corresponde a **AC 5.2**, y lo incorporaremos después sobre este mismo proyecto.
+Para comprobarlo, haz un pedido de 5 hamburguesas y vuelve a **Disponibilidad**. El stock debe cambiar de 40 a 35. Si recargas, se reinicia el stock porque aún no hemos añadido persistencia.
 
-## Capturas para Moodle
+## GitHub
 
-La diapositiva 264 pide capturas del proceso de compra y otra que muestre la carga diferida. Consulta `evidencias/INSTRUCCIONES.md`. Haz capturas reales de la aplicación ejecutándose, no de ilustraciones.
+Actualiza **el mismo repositorio** de AC 5.1 y crea un nuevo commit. Conserva el tag `ac-5.1` para mantener la versión anterior.
 
-## Código
-
-`App.tsx` guarda los productos y el stock. `Foods.tsx` muestra la carta. `FoodOrder.tsx` comunica el pedido al componente padre. Las imágenes están en `public/images`.
+El PDF no exige capturas adicionales específicamente para AC 5.2; revisa también la tarea de Moodle.
