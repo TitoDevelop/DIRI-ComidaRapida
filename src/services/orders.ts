@@ -1,4 +1,3 @@
-import { signInAnonymously } from 'firebase/auth';
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import { auth, database } from '../firebase/client';
 import { log } from './logger';
@@ -13,11 +12,10 @@ export interface Order {
   createdAt: number;
 }
 
-let signInPromise: ReturnType<typeof signInAnonymously> | null = null;
-
 async function userId() {
-  // El SDK conserva la sesión anónima al refrescar el navegador.
-  const user = auth.currentUser ?? (await (signInPromise ??= signInAnonymously(auth).finally(() => { signInPromise = null; }))).user;
+  await auth.authStateReady();
+  const user = auth.currentUser;
+  if (!user || user.isAnonymous) throw new Error('Debes iniciar sesión para gestionar pedidos.');
   return user.uid;
 }
 

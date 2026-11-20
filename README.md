@@ -1,40 +1,46 @@
-# AC 7.1 — Redux Toolkit (DIRI)
+# DIRI — AC 8.1 · Autenticación, autorización y mantenimiento de sesión
 
 **Alumno:** José Luis Mas García
 
-Proyecto construido sobre la última versión proporcionada de **DIRI-ComidaRapida**, con Firebase, CRUD, pruebas y despliegue por GitHub Actions.
+Partimos de AC 7.1 con React, Redux Toolkit, Firebase Authentication, Realtime Database y GitHub Pages.
 
-## Qué cambia en AC 7.1
-
-- `src/store/foodSlice.ts`: estado de carta, navegación y pedidos con Redux Toolkit.
-- `src/store/store.ts`: `configureStore` y middleware para registrar rechazos.
-- `src/store/hooks.ts`: hooks tipados para acceder al store desde los componentes.
-- Se elimina el anterior `FoodContext` para evitar dos fuentes distintas de estado.
-- `createAsyncThunk` para consultar, crear, editar y borrar pedidos en **Firebase Realtime Database**.
-- Seguimos mostrando mensajes de espera, de confirmación y de error; la carta conserva la carga diferida.
-- Se mantiene `ErrorBoundary`, el diseño original y las pruebas de la aplicación.
-
-## Comprobación en local
+## Arranque
 
 ```bash
-npm install
+npm ci
 npm run test
 npm run build
 npm run dev
 ```
 
-Comprueba el flujo: seleccionar producto, pedir varias unidades, ver descuento de stock, consultar pedidos, editar y borrar. Verifica en Realtime Database que los cambios se han guardado. Las operaciones de Firebase necesitan red y reglas de acceso correctas.
+Los datos públicos de configuración de Firebase están en `.env.production` (para GitHub Pages). Para trabajar en local crea `.env.local` a partir de `.env.example` y completa las variables `VITE_FIREBASE_*`. Nunca subas contraseñas ni claves de servicio.
 
-## Firebase
+## Firebase (configuración obligatoria)
 
-La app usa `VITE_FIREBASE_*` desde `.env.local` en desarrollo y `.env.production` al compilar para GitHub Pages. **No subas archivos con claves privadas o credenciales de cuenta de servicio.** La configuración web pública de Firebase no equivale a acceso administrativo: las reglas protegen los datos bajo `pedidos/$uid`.
+1. En Firebase Console > Authentication > Sign-in method, **habilitar Correo electrónico/Contraseña**. La autenticación anónima antigua puede permanecer activada, pero esta versión no concede acceso a invitados anónimos.
+2. En Realtime Database > Reglas, copia las reglas de `firebase-rules.json` y pulsa **Publicar**. Solo un usuario autenticado no anónimo puede acceder a su propia carpeta `pedidos/{uid}` o consultar su propio rol `roles/{uid}`.
+3. Crea una cuenta de prueba mediante la interfaz de registro de la aplicación. Comprueba que aparece en Authentication > Usuarios.
+4. Para probar el administrador, copia el **UID** de ese usuario en Authentication > Usuarios. Ve a Realtime Database > Datos y crea el nodo `roles/{UID}/admin` con valor booleano **true** (no texto). Después cierra sesión y vuelve a entrar para recargar el rol.
+5. Si ya hay pedidos de las prácticas con usuario anónimo, seguirán asociados al UID antiguo. Las nuevas cuentas no los verán (separación intencionada).
+6. En Authentication > Settings > Authorized domains, comprueba que esté autorizado `titodevelop.github.io` si el login desde GitHub Pages muestra `auth/unauthorized-domain`.
 
-## GitHub Pages
+> Importante: las reglas protegen los pedidos y los roles, pero en esta práctica el stock es un estado local en Redux, no una tabla persistida. Su acceso visual se restringe al administrador, tal como pide el ejercicio. Para un sistema real con inventario privado se necesitaría almacenar y leer el stock desde un backend sujeto a reglas de autorización.
 
-El repositorio debe llamarse `DIRI-ComidaRapida`. Vite utiliza `base: '/DIRI-ComidaRapida/'` en compilación y `/` al ejecutar Vite local. Se conservan las URLs de imágenes usando `import.meta.env.BASE_URL`.
+## Comprobaciones
 
-En Settings > Pages selecciona **GitHub Actions**. El workflow `.github/workflows/deploy.yml` instala dependencias, ejecuta pruebas, compila y publica `dist`. Si cambias el nombre del repositorio, ajusta `base` en `vite.config.ts`.
+- **Invitado**: ve carta y formulario de acceso, pero no stock, ni puede confirmar pedidos.
+- **Usuario registrado**: puede iniciar sesión, hacer, ver, editar y borrar sus pedidos, pero no ve stock.
+- **Administrador**: ve la pestaña Disponibilidad con cantidades.
+- **Persistencia de sesión**: al recargar la pestaña, Firebase restaura la sesión.
+- **Cerrar sesión**: desaparecen los pedidos personales y vuelve el formulario de acceso.
+- **Redux DevTools**: los pedidos siguen ejecutando `fetchOrders`, `submitOrder`, etc., con acciones `pending/fulfilled/rejected`.
+
+## Publicación
+
+El workflow `.github/workflows/deploy.yml` ejecuta pruebas y compilación con `npm ci`, y despliega en GitHub Pages. Comprueba que **Actions > Publicar en GitHub Pages** termina en verde.
+
+URL pública prevista después del despliegue: `https://titodevelop.github.io/DIRI-ComidaRapida/`.
 
 ## Entrega
 
-Según la actividad AC 7.1 (página 415), hay que entregar **URL pública**, **repositorio de código** y **PDF con capturas de funcionamiento**. En `evidencias/INSTRUCCIONES_AC7_1.md` se describen capturas recomendadas.
+El profesor pide URL pública, enlace al código fuente y PDF con capturas. En `evidencias/INSTRUCCIONES_AC8_1.md` se detallan las capturas recomendadas.

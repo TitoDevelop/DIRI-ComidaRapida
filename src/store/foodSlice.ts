@@ -45,6 +45,7 @@ export const eraseOrder = createAsyncThunk('food/eraseOrder', async (id: string)
 const foodSlice = createSlice({
   name: 'food', initialState,
   reducers: {
+    resetSession(state) { state.orders = []; state.ready = false; state.notice = ''; state.error = ''; state.busy = false; state.view = 'menu'; state.selectedId = null; },
     showStock(state) { state.view = 'stock'; },
     showMenu(state) { state.view = 'menu'; state.selectedId = null; },
     chooseFood(state, action: PayloadAction<number>) { state.view = 'order'; state.selectedId = action.payload; }
@@ -70,5 +71,5 @@ const foodSlice = createSlice({
       .addCase(eraseOrder.rejected, (state, action) => { state.busy = false; state.notice = ''; state.error = 'No se pudo eliminar: ' + errorText(action.error.message); });
   }
 });
-export const { showStock, showMenu, chooseFood } = foodSlice.actions;
+export const { showStock, showMenu, chooseFood, resetSession } = foodSlice.actions;
 export default foodSlice.reducer;
