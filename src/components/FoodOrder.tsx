@@ -3,15 +3,15 @@ import { useFood } from '../context/FoodContext';
 
 export default function FoodOrder() {
   // El producto, el envío del pedido y la navegación se obtienen de Context.
-  const { selectedFood: food, sendOrder, showMenu } = useFood();
+  const { selectedFood: food, sendOrder: submitOrder, showMenu } = useFood();
   const [quantity, setQuantity] = useState(1);
   const [ordered, setOrdered] = useState(false);
   if (!food) return null;
   const totalAmount = food.price * quantity;
 
-  const handleOrderClick = () => {
+  const handleOrder = () => {
     if (quantity < 1 || quantity > food.quantity || ordered) return;
-    if (sendOrder(food.id, quantity)) setOrdered(true);
+    if (submitOrder(food.id, quantity)) setOrdered(true);
   };
 
   return (
@@ -26,7 +26,7 @@ export default function FoodOrder() {
           <input id="quantity" type="number" min="1" max={food.quantity} value={quantity}
             onChange={e => setQuantity(Math.min(food.quantity, Math.max(1, Number(e.target.value) || 1)))} />
           <div className="total"><span>Total a pagar en la recogida</span><strong>{totalAmount.toFixed(2)} €</strong></div>
-          <button className="primary" onClick={handleOrderClick}>Enviar pedido</button></>
+          <button className="primary" onClick={handleOrder}>Enviar pedido</button></>
         )}
         <button className="back" onClick={showMenu}>← Volver al menú</button>
       </div>

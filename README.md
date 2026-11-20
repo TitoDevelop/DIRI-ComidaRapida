@@ -1,29 +1,38 @@
-# AC 5.2 — Contexto de React
+# AC 5.4 — Pruebas de la aplicación de comida rápida
 
-**Alumno:** José Luis Mas García
+**Alumno:** José Luis Mas García  
+**Asignatura:** Desarrollo de Interfaces Ricos para Internet
 
-Esta es la continuación de **AC 5.1**. El diseño y el proceso de compra siguen siendo los mismos, pero se sustituye el paso de información entre componentes por React Context, como pide el profesor en la diapositiva 275.
+Continúa la aplicación de **AC 5.2**, usando `React Context` y carga diferida en la carta.
 
 ## Ejecutar
 
 ```bash
 npm install
 npm run dev
+```
+
+## Pruebas
+
+```bash
+npm run test
 npm run build
 ```
 
-## Qué he cambiado
+`src/App.test.tsx` contiene tres pruebas con Vitest y React Testing Library:
 
-- `src/context/FoodContext.tsx`: almacena el menú, el stock, el producto seleccionado y las acciones de compra.
-- `App.tsx` contiene el `FoodProvider` y utiliza `useFood()`.
-- `Foods.tsx` obtiene los productos y la función de selección del contexto, sin props.
-- `FoodOrder.tsx` obtiene el producto y actualiza el stock usando el contexto, sin props.
-- Se mantiene la carga diferida de `Foods` de la actividad 5.1.
+1. Hay cuatro productos en la disponibilidad, con nombre y stock.
+2. Al entrar en Pedir comida aparecen cuatro productos, una imagen y precios.
+3. El precio de cinco hamburguesas pasa a 42,50 € y, al confirmar el pedido, el stock baja de 40 a 35.
 
-Para comprobarlo, haz un pedido de 5 hamburguesas y vuelve a **Disponibilidad**. El stock debe cambiar de 40 a 35. Si recargas, se reinicia el stock porque aún no hemos añadido persistencia.
+`src/test/setup.ts` carga los matchers de jest-dom. `vite.config.ts` configura el entorno `jsdom`.
 
-## GitHub
+## Correcciones respecto al código anterior
 
-Actualiza **el mismo repositorio** de AC 5.1 y crea un nuevo commit. Conserva el tag `ac-5.1` para mantener la versión anterior.
+Se han corregido dos referencias incorrectas detectadas en la versión AC 5.2: `foodItems` por `menuItems` en el componente `Foods` y el choque de nombres `sendOrder` en `FoodOrder`.
 
-El PDF no exige capturas adicionales específicamente para AC 5.2; revisa también la tarea de Moodle.
+## Entrega
+
+El PDF (página 310) pide **código fuente y una captura del resultado**. Guarda en `evidencias` una captura auténtica de la terminal después de ejecutar `npm run test`, y adjúntala en Moodle según el formato que aparezca allí.
+
+Para conservar las versiones de cada práctica en GitHub, etiqueta este commit como `ac-5.4`.
