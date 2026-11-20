@@ -1,26 +1,35 @@
 import { useState } from 'react';
+import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 import type { Order } from '../services/orders';
-
-interface Props {
-  orders: Order[];
-  busy: boolean;
-  onRefresh(): Promise<void>;
-  onUpdate(order: Order, quantity: number): Promise<boolean>;
-  onDelete(id: string): Promise<void>;
-}
-export default function Orders({ orders, busy, onRefresh, onUpdate, onDelete }: Props) {
-  const [editing, setEditing] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  return <section className="orders"><div className="orders-heading"><h2>Mis pedidos guardados</h2><button disabled={busy} onClick={() => void onRefresh()}>Actualizar lista</button></div>
-    {orders.length === 0 ? <p>Aún no tienes pedidos guardados.</p> :
-      <ul className="orders-list">{orders.map(order => <li key={order.id}>
-        <div><strong>{order.foodName}</strong><small>{new Date(order.createdAt).toLocaleString('es-ES')} · {order.id.slice(-6)}</small></div>
-        {editing === order.id ? <div className="order-actions"><label>Unidades <input aria-label={`Editar cantidad de ${order.foodName}`} type="number" min={1} value={quantity} onChange={e => setQuantity(Number(e.target.value))}/></label>
-          <button disabled={busy || !Number.isInteger(quantity) || quantity < 1} onClick={async () => { if (await onUpdate(order, quantity)) setEditing(null); }}>Guardar</button><button onClick={() => setEditing(null)}>Cancelar</button></div> :
-          <div className="order-actions"><span>{order.quantity} ud. · {order.total.toFixed(2)} €</span>
-            <button disabled={busy} onClick={() => { setEditing(order.id); setQuantity(order.quantity); }}>Editar</button>
-            <button disabled={busy} onClick={() => void onDelete(order.id)}>Borrar</button></div>}
-      </li>)}</ul>}
-    <p className="orders-note">Los pedidos se guardan en Firebase. La disponibilidad de la carta es una demostración local y se reinicia al recargar.</p>
+import { translateFoodName, useI18n } from '../i18n/I18nContext';
+interface Props {orders:Order[];busy:boolean;onRefresh():Promise<void>;onUpdate(order:Order,quantity:number):Promise<boolean>;onDelete(id:string):Promise<void>}
+export default function Orders({ orders,busy,onRefresh,onUpdate,onDelete }:Props){
+  const [editing,setEditing]=useState<string|null>(null);
+  const [quantity,setQuantity]=useState(1);
+  const [toDelete,setToDelete]=useState<Order|null>(null);
+  const {language,t}=useI18n();
+  const deleteConfirmed=async()=>{if(!toDelete)return;const id=toDelete.id;setToDelete(null);await onDelete(id);};
+  return <section className="orders"><div className="orders-heading"><h2>{t('saved')}</h2><button disabled={busy} onClick={()=>void onRefresh()}>{t('refresh')}</button></div>
+    {orders.length===0?<p>{t('empty')}</p>:<ul className="orders-list">{orders.map(order=><li key={order.id}>
+      <div><strong>{translateFoodName(order.foodId,t)}</strong><small>{new Date(order.createdAt).toLocaleString(language==='es'?'es-ES':'en-GB')} · {order.id.slice(-6)}</small></div>
+      {editing===order.id?<div className="order-actions"><label>{t('editQty')} <input aria-label={`${t('editQty')} ${translateFoodName(order.foodId,t)}`} type="number" min={1} value={quantity} onChange={e=>setQuantity(Number(e.target.value))}/></label>
+        <button disabled={busy||!Number.isInteger(quantity)||quantity<1} onClick={async()=>{if(await onUpdate(order,quantity))setEditing(null)}}>{t('save')}</button><button onClick={()=>setEditing(null)}>{t('cancel')}</button></div>:
+        <div className="order-actions"><span>{order.quantity} {language==='es'?'ud.':'pcs.'} · {order.total.toFixed(2)} €</span>
+          <button disabled={busy} onClick={()=>{setEditing(order.id);setQuantity(order.quantity)}}>{t('edit')}</button>
+          <button disabled={busy} onClick={()=>setToDelete(order)}>{t('remove')}</button></div>}
+    </li>)}</ul>}
+    <p className="orders-note">{t('note')}</p>
+    <Dialog open={toDelete!==null} onClose={()=>setToDelete(null)} className="relative z-50">
+      <div className="fixed inset-0 bg-black/60" aria-hidden="true"/>
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <DialogTitle className="text-xl font-bold text-stone-900">{t('confirmTitle')}</DialogTitle>
+          <Description className="mt-3 text-sm leading-6 text-stone-600">{t('confirmText')}</Description>
+          {toDelete&&<p className="mt-3 font-semibold text-parada">{translateFoodName(toDelete.foodId,t)} · {toDelete.quantity}</p>}
+          <div className="mt-6 flex justify-end gap-3"><button type="button" className="rounded-lg border border-stone-300 px-4 py-2" onClick={()=>setToDelete(null)}>{t('cancel')}</button>
+            <button type="button" className="rounded-lg bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-800" onClick={()=>void deleteConfirmed()}>{t('confirmDelete')}</button></div>
+        </DialogPanel>
+      </div>
+    </Dialog>
   </section>;
 }

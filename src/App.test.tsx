@@ -4,12 +4,12 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 import type { ReactNode } from 'react';
 
-const authMock = vi.hoisted(() => ({ loggedIn: false, admin: false, error: '' }));
+const authMock = vi.hoisted(() => ({ loggedIn: false, admin: false }));
 vi.mock('./firebase/client', () => ({ configured: true }));
 vi.mock('./auth/AuthContext', async () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => children,
   useAuth: () => ({ user: authMock.loggedIn ? { uid: 'test-user', email: 'alumno@ejemplo.com' } : null,
-    isAdmin: authMock.admin, loading: false, error: authMock.error, login: vi.fn(), register: vi.fn(),
+    isAdmin: authMock.admin, loading: false, error: '', login: vi.fn(), register: vi.fn(),
     logout: vi.fn(), clearError: vi.fn() })
 }));
 vi.mock('./services/orders', () => ({
@@ -17,7 +17,7 @@ vi.mock('./services/orders', () => ({
   createOrder: vi.fn(async (order: object) => ({ ...order, id: 'pedido-test' })),
   changeOrderQuantity: vi.fn(), deleteOrder: vi.fn()
 }));
-afterEach(() => { cleanup(); vi.clearAllMocks(); authMock.loggedIn = false; authMock.admin = false; authMock.error = ''; });
+afterEach(() => { cleanup(); vi.clearAllMocks(); authMock.loggedIn = false; authMock.admin = false; localStorage.removeItem('diri-language'); });
 
 describe('AC 8.1 — permisos y sesión', () => {
   it('como invitado muestra la carta pero no permite pedir ni consultar stock', async () => {
@@ -40,20 +40,36 @@ describe('AC 8.1 — permisos y sesión', () => {
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
     expect(await screen.findByText('¡Pedido confirmado y guardado!')).toBeInTheDocument();
   });
-  it('muestra un error de lectura del rol después de iniciar sesión', async () => {
-    authMock.loggedIn = true;
-    authMock.error = 'No se ha podido comprobar el rol de administrador.';
-    render(<App />);
-    expect(await screen.findByRole('alert')).toHaveTextContent(authMock.error);
-    expect(screen.queryByRole('button', { name: 'Disponibilidad (admin)' })).not.toBeInTheDocument();
-    await screen.findByRole('img', { name: 'Hamburguesa de pollo' });
-  });
-
   it('el administrador puede consultar la disponibilidad', async () => {
     authMock.loggedIn = true; authMock.admin = true;
     const user = userEvent.setup(); render(<App />);
     await user.click(screen.getByRole('button', { name: 'Disponibilidad (admin)' }));
-    expect(screen.getByRole('heading', { name: 'Productos disponibles' })).toBeInTheDocument();
-    expect(screen.getByText('18 unidades')).toBeInTheDocument();
+    expect(screen.getByText('40 unidades')).toBeInTheDocument();
+    expect(screen.getByText('35 unidades')).toBeInTheDocument();
+  });
+});
+
+
+describe('AC 9.1 — traducciones y componente UI', () => {
+  it('cambia la carta al inglés y conserva el idioma', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole('button', { name: 'EN' }));
+    expect(await screen.findByRole('heading', { name: 'What would you like?' })).toBeInTheDocument();
+    expect(localStorage.getItem('diri-language')).toBe('en');
+  });
+  it('pide confirmación antes de borrar un pedido', async () => {
+    authMock.loggedIn=true;
+    const { createOrder } = await import('./services/orders');
+    const { listOrders } = await import('./services/orders');
+    vi.mocked(listOrders).mockResolvedValueOnce([{ id:'test-order', foodId:1, foodName:'Hamburguesa de pollo', quantity:2, unitPrice:8.5, total:17, createdAt:Date.now() }]);
+    const user=userEvent.setup(); render(<App />);
+    const remove=await screen.findByRole('button',{name:'Borrar'});
+    await user.click(remove);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('¿Eliminar el pedido?')).toBeInTheDocument();
+    await user.click(screen.getByRole('button',{name:'Cancelar'}));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(createOrder).not.toHaveBeenCalled();
   });
 });

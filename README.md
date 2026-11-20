@@ -1,46 +1,44 @@
-# DIRI — AC 8.1 · Autenticación, autorización y mantenimiento de sesión
+# AC 9.1 — Framework UI y globalización
 
-**Alumno:** José Luis Mas García
+**Alumno:** José Luis Mas García  
+**Asignatura:** DIRI — Universidad de Alicante
 
-Partimos de AC 7.1 con React, Redux Toolkit, Firebase Authentication, Realtime Database y GitHub Pages.
+Esta versión parte de la **AC 8.1** con Redux Toolkit, Firebase Realtime Database y Firebase Authentication. Añade **Tailwind CSS**, **Headless UI** y dos idiomas (español e inglés).
 
-## Arranque
+## Puesta en marcha
 
 ```bash
-npm ci
+npm install
 npm run test
 npm run build
 npm run dev
 ```
 
-Los datos públicos de configuración de Firebase están en `.env.production` (para GitHub Pages). Para trabajar en local crea `.env.local` a partir de `.env.example` y completa las variables `VITE_FIREBASE_*`. Nunca subas contraseñas ni claves de servicio.
+El proyecto usa `tailwindcss` 3 con `postcss` y `autoprefixer`. Las clases de Tailwind aparecen en el selector de idiomas y el diálogo de confirmación. El diálogo es de `@headlessui/react` (no se ha recreado de cero). La aplicación mantiene el CSS anterior para no romper las vistas de las demás actividades.
 
-## Firebase (configuración obligatoria)
+## Cómo comprobar AC 9.1
 
-1. En Firebase Console > Authentication > Sign-in method, **habilitar Correo electrónico/Contraseña**. La autenticación anónima antigua puede permanecer activada, pero esta versión no concede acceso a invitados anónimos.
-2. En Realtime Database > Reglas, copia las reglas de `firebase-rules.json` y pulsa **Publicar**. Solo un usuario autenticado no anónimo puede acceder a su propia carpeta `pedidos/{uid}` o consultar su propio rol `roles/{uid}`.
-3. Crea una cuenta de prueba mediante la interfaz de registro de la aplicación. Comprueba que aparece en Authentication > Usuarios.
-4. Para probar el administrador, copia el **UID** de ese usuario en Authentication > Usuarios. Ve a Realtime Database > Datos y crea el nodo `roles/{UID}/admin` con valor booleano **true** (no texto). Después cierra sesión y vuelve a entrar para recargar el rol.
-5. Si ya hay pedidos de las prácticas con usuario anónimo, seguirán asociados al UID antiguo. Las nuevas cuentas no los verán (separación intencionada).
-6. En Authentication > Settings > Authorized domains, comprueba que esté autorizado `titodevelop.github.io` si el login desde GitHub Pages muestra `auth/unauthorized-domain`.
+1. Cambia con los botones **ES / EN** y comprueba que cambian la navegación, la carta, el formulario, los pedidos y el modal.
+2. Recarga la página: el idioma escogido permanece guardado con `localStorage`.
+3. Inicia sesión, haz un pedido y pulsa **Borrar**: Headless UI muestra un cuadro de confirmación con botones de cancelar o eliminar.
+4. Verifica que cancelar no elimina nada; confirmar sí borra en Firebase.
+5. Entra con un administrador: solo él ve la pestaña de stock.
 
-> Importante: las reglas protegen los pedidos y los roles, pero en esta práctica el stock es un estado local en Redux, no una tabla persistida. Su acceso visual se restringe al administrador, tal como pide el ejercicio. Para un sistema real con inventario privado se necesitaría almacenar y leer el stock desde un backend sujeto a reglas de autorización.
+## Archivos importantes
 
-## Comprobaciones
+- `src/i18n/I18nContext.tsx` contiene diccionarios, selección y persistencia de idioma.
+- `src/components/LanguageSwitcher.tsx` utiliza clases de Tailwind.
+- `src/components/Orders.tsx` utiliza el diálogo accesible de Headless UI.
+- `tailwind.config.cjs`, `postcss.config.cjs` y `src/style.css` integran Tailwind.
 
-- **Invitado**: ve carta y formulario de acceso, pero no stock, ni puede confirmar pedidos.
-- **Usuario registrado**: puede iniciar sesión, hacer, ver, editar y borrar sus pedidos, pero no ve stock.
-- **Administrador**: ve la pestaña Disponibilidad con cantidades.
-- **Persistencia de sesión**: al recargar la pestaña, Firebase restaura la sesión.
-- **Cerrar sesión**: desaparecen los pedidos personales y vuelve el formulario de acceso.
-- **Redux DevTools**: los pedidos siguen ejecutando `fetchOrders`, `submitOrder`, etc., con acciones `pending/fulfilled/rejected`.
+## GitHub Pages
 
-## Publicación
+Se conserva la base `/DIRI-ComidaRapida/`, el directorio `dist` y el workflow en `.github/workflows/deploy.yml`.  **Esta entrega cambia dependencias**, por lo que el lockfile anterior queda pendiente de regenerar con `npm install` en tu equipo. El workflow usa `npm install` en lugar de `npm ci` para no fallar con un lockfile antiguo. **Recomendado:** ejecuta `npm install`, incluye el `package-lock.json` generado en el commit y, después, vuelve al comando `npm ci --no-audit --no-fund` en el workflow para tener instalaciones reproducibles.
 
-El workflow `.github/workflows/deploy.yml` ejecuta pruebas y compilación con `npm ci`, y despliega en GitHub Pages. Comprueba que **Actions > Publicar en GitHub Pages** termina en verde.
+Por limitaciones de red del entorno de preparación, no se ha podido ejecutar la instalación, las pruebas ni la compilación completa. **Haz las comprobaciones anteriores antes del push.**
 
-URL pública prevista después del despliegue: `https://titodevelop.github.io/DIRI-ComidaRapida/`.
+## Entrega al profesor
 
-## Entrega
-
-El profesor pide URL pública, enlace al código fuente y PDF con capturas. En `evidencias/INSTRUCCIONES_AC8_1.md` se detallan las capturas recomendadas.
+- URL pública en GitHub Pages.
+- URL del código fuente en GitHub, con etiqueta `ac-9.1`.
+- PDF con capturas reales (véase `evidencias/INSTRUCCIONES_AC9_1.md`).
