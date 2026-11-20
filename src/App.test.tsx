@@ -36,6 +36,7 @@ describe('AC 5.4 + AC 6.2', () => {
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
     expect(await screen.findByText('¡Pedido confirmado y guardado!')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Disponibilidad' }));
-    expect(screen.getByText('35 unidades')).toBeInTheDocument();
+    const stockRow = screen.getByText('Hamburguesa de pollo', { selector: '.availability-row .item-name' }).closest<HTMLElement>('.availability-row');
+    expect(within(stockRow!).getByText('35 unidades')).toBeInTheDocument();
   });
 });
