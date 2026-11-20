@@ -1,42 +1,68 @@
-# DIRI — AC 5.5: Despliegue en GitHub Pages
+# AC 6.2 — CRUD REST con Firebase
 
-Alumno: José Luis Mas García
+**Alumno:** José Luis Mas García  
+**Asignatura:** DIRI · Universidad de Alicante
 
-Esta versión de la tienda de comida rápida mantiene las actividades anteriores (AC 5.1, AC 5.2 y AC 5.4) y añade la publicación automática mediante GitHub Actions.
+Continuación de la aplicación de comida rápida. Esta entrega utiliza Firebase Realtime Database y Authentication anónima para guardar, consultar, editar y borrar pedidos. Añade registros de actividad, gestión de errores en componentes y mensajes de carga durante las operaciones asíncronas.
 
-## Ejecutar y comprobar
+## 1. Probar en local
+
+1. El archivo `.env.local` está preparado para el proyecto Firebase `diri-comidarapida`. Está excluido del repositorio por `.gitignore`.
+2. Comprueba en Firebase que está habilitada la autenticación **Anónima**, que existe Realtime Database y que sus reglas protegen `pedidos/$uid`.
+3. Ejecuta:
 
 ```bash
 npm install
-npm run test
-npm run build
 npm run dev
 ```
 
-## Publicar en GitHub Pages
+4. Abre la dirección local de Vite. En la vista inicial debería aparecer «Pedidos cargados correctamente».
+5. Haz un pedido de cinco hamburguesas. Debe aparecer la confirmación y el pedido debajo de la carta.
+6. En Firebase Console > Realtime Database > Datos comprueba que existe `pedidos/<uid>/<id-pedido>`.
+7. Prueba editar la cantidad y borrar el pedido; verifica esos cambios en Firebase.
+8. Ejecuta las pruebas y compila:
 
-1. Subir esta versión a la rama `main` de `TitoDevelop/DIRI-ComidaRapida`.
-2. Entrar en **Settings > Pages**.
-3. En **Build and deployment**, cambiar **Source** a **GitHub Actions**.
-4. Entrar en la pestaña **Actions** y comprobar que el workflow `Publicar en GitHub Pages` termina en verde.
-5. Abrir la URL publicada y revisar que aparecen las imágenes, que la carta carga y que el pedido descuenta stock.
+```bash
+npm run test
+npm run build
+```
 
-El workflow se ejecuta automáticamente con cada push a `main`, y también se puede lanzar manualmente desde Actions.
+## 2. Configuración de Firebase
 
-**URL prevista** (solo funcionará tras publicar con éxito):
-https://titodevelop.github.io/DIRI-ComidaRapida/
+Este proyecto usa la configuración pública de Firebase Web SDK que facilitaste. La configuración está en `.env.production` para que GitHub Pages pueda compilar con GitHub Actions. Las variables `VITE_*` se incluyen en el bundle web: **no son secretos ni deben contener contraseñas, credenciales de servicio ni tokens privados**. La protección de los datos depende de Authentication y las reglas de Realtime Database.
 
-**Repositorio**:
-https://github.com/TitoDevelop/DIRI-ComidaRapida
+Reglas de Realtime Database para esta práctica:
 
-## Cambios de esta actividad
+```json
+{
+  "rules": {
+    "pedidos": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}
+```
 
-- `vite.config.ts`: base de Vite ajustada a la ruta del repositorio al compilar.
-- `.github/workflows/deploy.yml`: instala dependencias, ejecuta pruebas, compila y publica.
-- `Foods.tsx` y `FoodOrder.tsx`: rutas de imágenes adaptadas a la ruta base de Vite.
+**Nota:** la configuración de Firebase expuesta al cliente no reemplaza unas reglas de seguridad correctas.
 
-Si el repositorio cambia de nombre, modifica la ruta `/DIRI-ComidaRapida/` en `vite.config.ts`.
+## 3. Qué realiza cada archivo
 
-## Entrega
+- `src/firebase/client.ts`: inicializa Firebase, Authentication y Realtime Database.
+- `src/services/orders.ts`: operaciones de lectura, creación, edición y borrado de pedidos mediante SDK Firebase.
+- `src/services/logger.ts`: registro de acciones y errores en consola.
+- `src/context/FoodContext.tsx`: estado compartido y funciones asíncronas; solo confirma pedidos después del guardado remoto.
+- `src/components/Orders.tsx`: listado editable y eliminación de pedidos persistentes.
+- `src/components/ErrorBoundary.tsx`: captura de errores de renderizado de React; los fallos asíncronos se manejan con `try/catch` y avisos visibles.
 
-El profesor solicita dos URLs: la pública del frontend y la del repositorio. No se exigen capturas expresamente en AC 5.5.
+La disponibilidad del catálogo se actualiza en memoria como en la práctica anterior, **pero no persiste después de recargar**. Lo que se persiste en Firebase es el historial de pedidos. Tampoco se simula un pago online: se paga en efectivo al recoger.
+
+## 4. Publicar
+
+Se conserva el workflow `.github/workflows/deploy.yml`. Tras hacer push a `main`, comprueba el resultado en GitHub Actions y la web publicada. Si las pruebas o la compilación fallan, no publiques hasta corregirlos.
+
+## 5. Entrega
+
+El profesor pide URL de la aplicación en producción, enlace a GitHub y PDF con capturas reales. Guía en `evidencias/INSTRUCCIONES_AC6_2.md`.
