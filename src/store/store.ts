@@ -13,9 +13,10 @@ const loggingMiddleware: Middleware = () => next => action => {
   return result;
 };
 
-export const store = configureStore({
+export const createAppStore = () => configureStore({
   reducer: { food: foodReducer },
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(loggingMiddleware)
 });
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+type AppStore = ReturnType<typeof createAppStore>;
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];

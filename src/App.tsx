@@ -1,6 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
-import { store } from './store/store';
+import { createAppStore } from './store/store';
 import { useAppDispatch, useFood } from './store/hooks';
 import { fetchOrders, resetSession } from './store/foodSlice';
 import { AuthProvider, useAuth } from './auth/AuthContext';
@@ -56,5 +56,6 @@ function Shop() {
   </div>;
 }
 export default function App() {
+  const [store] = useState(createAppStore);
   return <ErrorBoundary><Provider store={store}><I18nProvider><AuthProvider><Shop /></AuthProvider></I18nProvider></Provider></ErrorBoundary>;
 }
