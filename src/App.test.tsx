@@ -20,7 +20,7 @@ describe('AC 5.4 - Comida rápida', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'Pedir comida' }));
 
-    const cards = document.querySelectorAll('.food-card');
+    const cards = await screen.findAllByRole('article');
     expect(cards).toHaveLength(4);
     expect(screen.getByRole('img', { name: 'Hamburguesa de pollo' }))
       .toHaveAttribute('src', '/images/pollo.svg');
@@ -33,7 +33,8 @@ describe('AC 5.4 - Comida rápida', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'Pedir comida' }));
 
-    const card = screen.getByRole('img', { name: 'Hamburguesa de pollo' }).closest('article');
+    const image = await screen.findByRole('img', { name: 'Hamburguesa de pollo' });
+    const card = image.closest('article');
     expect(card).not.toBeNull();
     await user.click(within(card!).getByRole('button', { name: 'Elegir' }));
     const cantidad = screen.getByRole('spinbutton', { name: /Cantidad/ });

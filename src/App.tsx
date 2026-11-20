@@ -22,7 +22,7 @@ function Shop() {
         {view === 'menu' && <Suspense fallback={<p role="status" className="loading">Cargando carta...</p>}><Foods /></Suspense>}
         {view === 'order' && selectedFood && <FoodOrder key={selectedFood.id} />}
       </main>
-      <footer>Proyecto DIRI · AC 5.4 · José Luis Mas García</footer>
+      <footer>Proyecto DIRI · AC 5.5 · José Luis Mas García</footer>
     </div>
   );
 }

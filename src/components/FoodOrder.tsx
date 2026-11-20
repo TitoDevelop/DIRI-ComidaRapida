@@ -16,7 +16,7 @@ export default function FoodOrder() {
 
   return (
     <section className="order-layout">
-      <div className="order-photo"><img src={`/images/${food.image}`} alt={food.name} /></div>
+      <div className="order-photo"><img src={`${import.meta.env.BASE_URL}images/${food.image}`} alt={food.name} /></div>
       <div className="order-info">
         <span className="eyebrow">PEDIDO PARA RECOGER</span><h2>{food.name}</h2><p>{food.desc}</p>
         {ordered ? (

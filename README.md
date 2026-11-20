@@ -1,38 +1,42 @@
-# AC 5.4 — Pruebas de la aplicación de comida rápida
+# DIRI — AC 5.5: Despliegue en GitHub Pages
 
-**Alumno:** José Luis Mas García  
-**Asignatura:** Desarrollo de Interfaces Ricos para Internet
+Alumno: José Luis Mas García
 
-Continúa la aplicación de **AC 5.2**, usando `React Context` y carga diferida en la carta.
+Esta versión de la tienda de comida rápida mantiene las actividades anteriores (AC 5.1, AC 5.2 y AC 5.4) y añade la publicación automática mediante GitHub Actions.
 
-## Ejecutar
+## Ejecutar y comprobar
 
 ```bash
 npm install
+npm run test
+npm run build
 npm run dev
 ```
 
-## Pruebas
+## Publicar en GitHub Pages
 
-```bash
-npm run test
-npm run build
-```
+1. Subir esta versión a la rama `main` de `TitoDevelop/DIRI-ComidaRapida`.
+2. Entrar en **Settings > Pages**.
+3. En **Build and deployment**, cambiar **Source** a **GitHub Actions**.
+4. Entrar en la pestaña **Actions** y comprobar que el workflow `Publicar en GitHub Pages` termina en verde.
+5. Abrir la URL publicada y revisar que aparecen las imágenes, que la carta carga y que el pedido descuenta stock.
 
-`src/App.test.tsx` contiene tres pruebas con Vitest y React Testing Library:
+El workflow se ejecuta automáticamente con cada push a `main`, y también se puede lanzar manualmente desde Actions.
 
-1. Hay cuatro productos en la disponibilidad, con nombre y stock.
-2. Al entrar en Pedir comida aparecen cuatro productos, una imagen y precios.
-3. El precio de cinco hamburguesas pasa a 42,50 € y, al confirmar el pedido, el stock baja de 40 a 35.
+**URL prevista** (solo funcionará tras publicar con éxito):
+https://titodevelop.github.io/DIRI-ComidaRapida/
 
-`src/test/setup.ts` carga los matchers de jest-dom. `vite.config.ts` configura el entorno `jsdom`.
+**Repositorio**:
+https://github.com/TitoDevelop/DIRI-ComidaRapida
 
-## Correcciones respecto al código anterior
+## Cambios de esta actividad
 
-Se han corregido dos referencias incorrectas detectadas en la versión AC 5.2: `foodItems` por `menuItems` en el componente `Foods` y el choque de nombres `sendOrder` en `FoodOrder`.
+- `vite.config.ts`: base de Vite ajustada a la ruta del repositorio al compilar.
+- `.github/workflows/deploy.yml`: instala dependencias, ejecuta pruebas, compila y publica.
+- `Foods.tsx` y `FoodOrder.tsx`: rutas de imágenes adaptadas a la ruta base de Vite.
+
+Si el repositorio cambia de nombre, modifica la ruta `/DIRI-ComidaRapida/` en `vite.config.ts`.
 
 ## Entrega
 
-El PDF (página 310) pide **código fuente y una captura del resultado**. Guarda en `evidencias` una captura auténtica de la terminal después de ejecutar `npm run test`, y adjúntala en Moodle según el formato que aparezca allí.
-
-Para conservar las versiones de cada práctica en GitHub, etiqueta este commit como `ac-5.4`.
+El profesor solicita dos URLs: la pública del frontend y la del repositorio. No se exigen capturas expresamente en AC 5.5.
