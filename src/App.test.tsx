@@ -43,7 +43,7 @@ describe('AC 5.4 - Comida rápida', () => {
     await user.click(screen.getByRole('button', { name: 'Enviar pedido' }));
     expect(screen.getByText('¡Pedido confirmado!')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Disponibilidad' }));
-    const row = screen.getByText('Hamburguesa de pollo').closest('.availability-row');
+    const row = screen.getByText('Hamburguesa de pollo').closest<HTMLDivElement>('div.availability-row');
     expect(row).not.toBeNull();
     expect(within(row!).getByText('35 unidades')).toBeInTheDocument();
   });
