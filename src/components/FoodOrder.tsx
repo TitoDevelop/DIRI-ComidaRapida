@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFood } from '../context/FoodContext';
+import { useFood } from '../store/hooks';
 
 export default function FoodOrder() {
   const { selectedFood: food, sendOrder, showMenu, busy, ready } = useFood();

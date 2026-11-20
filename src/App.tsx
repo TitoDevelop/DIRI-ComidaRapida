@@ -1,12 +1,18 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store/store';
+import { useAppDispatch } from './store/hooks';
+import { fetchOrders } from './store/foodSlice';
 import FoodOrder from './components/FoodOrder';
 import Orders from './components/Orders';
 import ErrorBoundary from './components/ErrorBoundary';
-import { FoodProvider, useFood } from './context/FoodContext';
+import { useFood } from './store/hooks';
 import { configured } from './firebase/client';
 
 const Foods = lazy(() => import('./components/Foods'));
 function Shop() {
+  const dispatch = useAppDispatch();
+  useEffect(() => { if (configured) void dispatch(fetchOrders()); }, [dispatch]);
   const { menuItems, orders, view, selectedFood, showStock, showMenu, busy, ready, notice, error, refreshOrders, updateOrder, removeOrder } = useFood();
   return <div className="site">
     <header className="topbar"><div className="brand"><span className="brand-mark">LP.</span><span>LA PARADA <small>COMIDA PARA LLEVAR</small></span></div><span className="header-note">Recogida en local · Pago en efectivo</span></header>
@@ -27,9 +33,9 @@ function Shop() {
       {configured && <Orders orders={orders} busy={busy} onRefresh={refreshOrders} onUpdate={updateOrder} onDelete={removeOrder}/>}
       {configured && !ready && !busy && <button onClick={() => void refreshOrders()}>Reintentar conexión</button>}
     </main>
-    <footer>Proyecto DIRI · AC 6.2 · José Luis Mas García</footer>
+    <footer>Proyecto DIRI · AC 7.1 · José Luis Mas García</footer>
   </div>;
 }
 export default function App() {
-  return <ErrorBoundary><FoodProvider><Shop/></FoodProvider></ErrorBoundary>;
+  return <ErrorBoundary><Provider store={store}><Shop/></Provider></ErrorBoundary>;
 }

@@ -1,4 +1,4 @@
-import { useFood } from '../context/FoodContext';
+import { useFood } from '../store/hooks';
 
 export default function Foods() {
   // Los productos y la selección vienen del contexto, no de props.

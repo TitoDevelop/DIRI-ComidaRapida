@@ -22,13 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el repositorio
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
       - name: Instalar Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Instalar dependencias
-        run: npm install
+        run: npm install --no-audit --no-fund
       - name: Ejecutar pruebas
         run: npm run test
       - name: Compilar aplicación
